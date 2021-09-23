@@ -242,9 +242,9 @@ class DrawPane extends JPanel{
             if(!raw.equals("")) {
                 ArrayList<String> args =  slicer(raw);
                 ArrayList<String> args2 =  slicer(raw2);
-                //System.out.println("Array: " + args);
-                //System.out.println("Slicer 1: " + slicer("1"));
-                //System.out.println("Slicer 20: " + slicer("20"));
+                // System.out.println("Array: " + args);
+                // System.out.println("Slicer a: " + slicer("(* (^ 2 a) t)"));
+                // System.out.println("Slicer b: " + slicer("(* (^ 2 a) 3333)"));
                 points.add(scheme(args, t));    //(+ (* -1 (/ (* t t) 400)) 600) //(+ (/ (* t t) 2333) (* 20 (tan (sin (+ (* 444 t) 5)))))
                 points2.add(scheme(args2, t));
             } else {
@@ -296,11 +296,15 @@ class DrawPane extends JPanel{
             }
         }
         for (int i=0;i<stripped.length();i++) {
+            // System.out.println(i + " | " + stripped);
             if (stripped.charAt(i) == ' ' && out.size()==0) {
+                // System.out.println("\tFunction Found, now: " + stripped);
                 out.add(stripped.substring(0, i));
                 stripped = stripped.substring(i+1, stripped.length());
+                // System.out.println("\tFunction Removed, now: " + stripped);
                 i=-1;
             } else if(stripped.charAt(i)=='(') {
+                // System.out.println("\tBrackets Found, now: " + stripped);
                 int counter = 1;
                 for (int j=i+1;j<stripped.length();j++) {
                     if(stripped.charAt(j)=='(') {
@@ -309,29 +313,30 @@ class DrawPane extends JPanel{
                         counter--;
                         if (counter==0) {
                             out.add(stripped.substring(i, j+1));
-                            if (j+2>=stripped.length()-1) {
+                            if (j+1>=stripped.length()) {
                                 stripped = "";
                             } else {
                                 stripped = stripped.substring(j+2, stripped.length());
                             }
+                            // System.out.println("\tBrackets Removed, now: " + stripped);
                             i=-1;
                             break;
                         }
                     }
                 }
             } else if (stripped.charAt(i)!=' ' && out.size()!=0) {
-                //System.out.println("variable found: " + stripped.charAt(i));
+                // System.out.println("\tVariable Found, now: " + stripped);
                 if (i+1 == stripped.length()) {
                     out.add(stripped);
+                    // System.out.println("\tVariable Removed, now: " + stripped);
+                    break;
                 }
                 for (int y=i+1;y<stripped.length();y++) {
-                    //System.out.println("i is: " + i + " : " + stripped.charAt(i));
-                    //System.out.println("y is: " + y + " : " + stripped.charAt(y));
                     if (stripped.charAt(y)==' ') {
                         out.add(stripped.substring(i, y));
                         stripped = stripped.substring(y+1, stripped.length());
-                        //System.out.println("remaining: " + stripped);
                         i=-1;
+                        // System.out.println("\tVariable Removed, now: " + stripped);
                         break;
                     }
                 }
