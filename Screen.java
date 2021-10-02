@@ -1,33 +1,61 @@
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.event.*;
+import java.util.ArrayList;
 
+import javax.swing.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class Screen {
     public final static int W = Toolkit.getDefaultToolkit().getScreenSize().width;
     public final static int H = Toolkit.getDefaultToolkit().getScreenSize().height;
-    public static int A = 0;
-    public static int B = 0;
-    public static int C = 0;
-    public static int D = 0;
-    public static int Resolution = 10;
-    public static double zoomX = 1;
-    public static double zoomY = 1;
-    public static int offsetX = 0;
-    public static int offsetY = 0;
-    public JFrame frame = new JFrame("Graphing Program");
-    public JPanel panel = new JPanel();
+    public static Curve curve;
+    public static JFrame frame = new JFrame("Graphing Program");
+    public static JPanel panel = new JPanel();
+    public static DrawPane graph;
     public static JLabel[] labels = {null, null, null, null};
-    public static TextField fField1;
-    public static TextField fField2;
-    public static int mode = 1;
+    public static ArrayList<TextField> fFields = new ArrayList<TextField>();
 
     public Screen() {
         frame.add(panel);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(new EmptyBorder(5,5,5,5));
+
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenu editMenu = new JMenu("Edit");
+        JMenu newMenu = new JMenu("New");
+        JMenuItem newStandard = new JMenuItem("Standard");
+        newStandard.setMnemonic(KeyEvent.VK_S);
+        newStandard.setActionCommand("Standard");
+        JMenuItem newParametric = new JMenuItem("Parametric");
+        newParametric.setMnemonic(KeyEvent.VK_P);
+        newParametric.setActionCommand("Parametric");
+        JMenuItem importMenuItem = new JMenuItem("Import");
+        importMenuItem.setMnemonic(KeyEvent.VK_I);
+        importMenuItem.setActionCommand("Import");
+        JMenuItem exportMenuItem = new JMenuItem("Export");
+        exportMenuItem.setMnemonic(KeyEvent.VK_E);
+        exportMenuItem.setActionCommand("Export");
+        JMenuItem resetOMenuItem = new JMenuItem("Reset Offset");
+        resetOMenuItem.setMnemonic(KeyEvent.VK_O);
+        resetOMenuItem.setActionCommand("Reset Offset");
+        JMenuItem resetZMenuItem = new JMenuItem("Reset Zoom");
+        resetZMenuItem.setMnemonic(KeyEvent.VK_Z);
+        resetZMenuItem.setActionCommand("Reset Zoom");
+        JMenuItem resetMenuItem = new JMenuItem("Reset");
+        resetMenuItem.setMnemonic(KeyEvent.VK_R);
+        resetMenuItem.setActionCommand("Reset");
+        fileMenu.add(newMenu);
+        newMenu.add(newStandard);
+        newMenu.add(newParametric);
+        fileMenu.add(importMenuItem);
+        fileMenu.add(exportMenuItem);
+        editMenu.add(resetOMenuItem);
+        editMenu.add(resetZMenuItem);
+        editMenu.add(resetMenuItem);
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBorder(new EmptyBorder(5,5,5,5));
@@ -45,9 +73,31 @@ public class Screen {
         labelPanel.add(xzLabel);
         labelPanel.add(yzLabel);
 
-        DrawPane graphPanel = new DrawPane();
-        graphPanel.setBorder(new EmptyBorder(5,5,5,5));
-        graphPanel.setPreferredSize(new Dimension(W,H));
+        JPanel renderPanel = new JPanel();
+        renderPanel.setBorder(new EmptyBorder(5,5,5,5));
+        renderPanel.setLayout(new BoxLayout(renderPanel, BoxLayout.X_AXIS));
+        JLabel minLabel = new JLabel("Min");
+        JLabel maxLabel = new JLabel("Max");
+        JLabel changeLabel = new JLabel("Change");
+        TextField minField = new TextField("0");
+        TextField maxField = new TextField(Integer.toString(W));
+        TextField changeField = new TextField("1");
+        renderPanel.add(minLabel);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        renderPanel.add(minField);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        renderPanel.add(maxLabel);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        renderPanel.add(maxField);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        renderPanel.add(changeLabel);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        renderPanel.add(changeField);
+        renderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+
+        graph = new DrawPane();
+        graph.setBorder(new EmptyBorder(5,5,5,5));
+        graph.setPreferredSize(new Dimension(W,H));
         
         JPanel sliderPanel = new JPanel();
         sliderPanel.setBorder(new EmptyBorder(5,5,5,5));
@@ -91,117 +141,173 @@ public class Screen {
         sliderPanel.add(dLabel);
         sliderPanel.add(Box.createRigidArea(new Dimension(5, 0)));
         sliderPanel.add(dSlider); 
-        
-        JPanel runPanel = new JPanel();
-        runPanel.setBorder(new EmptyBorder(5,5,5,5));
-        runPanel.setLayout(new BoxLayout(runPanel, BoxLayout.X_AXIS));
-        TextField functionField = new TextField();
-        fField1 = functionField;
-        JButton runButton = new JButton("Function");
-        JButton runButtonNC = new JButton("Over Paint");
-        runPanel.add(functionField);
-        runPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        runPanel.add(runButton);
-        runPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        runPanel.add(runButtonNC);
 
-        JPanel fourierPanel = new JPanel(); 
-        fourierPanel.setBorder(new EmptyBorder(5,5,5,5));
-        fourierPanel.setLayout(new BoxLayout(fourierPanel, BoxLayout.X_AXIS));
-        TextField function2Field = new TextField();
-        fField2 = function2Field;
-        JButton fourierButton = new JButton("Fourier");
-        JButton fourierButtonNC = new JButton("Over Paint");
-        fourierPanel.add(function2Field);
-        fourierPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        fourierPanel.add(fourierButton);
-        fourierPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-        fourierPanel.add(fourierButtonNC);
-
+        frame.setJMenuBar(menuBar);
         panel.add(labelPanel);
-        panel.add(graphPanel);
+        panel.add(renderPanel);
+        panel.add(graph);
         panel.add(sliderPanel);
-        panel.add(runPanel);
-        panel.add(fourierPanel);
+        panel.add(new FunctionPanel(1,new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve.mnF = Double.parseDouble(minField.getText());
+                curve.mxF = Double.parseDouble(maxField.getText());
+                curve.chF = Double.parseDouble(changeField.getText());
+                curve.update();
+            }
+        }));
 
         frame.pack();
         frame.setVisible(true);
 
-        runButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Screen.mode = 1;
-                graphPanel.f(functionField.getText());
-                graphPanel.repaint();
-            }
-        });
-        runButtonNC.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Screen.mode = 1;
-                graphPanel.fNC(functionField.getText());
-                graphPanel.repaint();
-            }
-        });
-        fourierButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Screen.mode = 2;
-                graphPanel.f(functionField.getText(),function2Field.getText());
-                graphPanel.repaint();
-            }
-        });
-        fourierButtonNC.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Screen.mode = 2;
-                graphPanel.fNC(functionField.getText(),function2Field.getText());
-                graphPanel.repaint();
-            }
-        });
         aSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent event) {
-                Screen.A = aSlider.getValue();
-                if (Screen.mode==1) {
-                    graphPanel.f(functionField.getText());
-                    graphPanel.repaint();
-                } else {
-                    graphPanel.f(functionField.getText(),function2Field.getText());
-                    graphPanel.repaint();
-                }
+                curve.A = aSlider.getValue();
+                curve.update();
             }
         });
         bSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent event) {
-                Screen.B = bSlider.getValue();
-                if (Screen.mode==1) {
-                    graphPanel.f(functionField.getText());
-                    graphPanel.repaint();
-                } else {
-                    graphPanel.f(functionField.getText(),function2Field.getText());
-                    graphPanel.repaint();
-                }
+                curve.B = bSlider.getValue();
+                curve.update();
             }
         });
         cSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent event) {
-                Screen.C = cSlider.getValue();
-                if (Screen.mode==1) {
-                    graphPanel.f(functionField.getText());
-                    graphPanel.repaint();
-                } else {
-                    graphPanel.f(functionField.getText(),function2Field.getText());
-                    graphPanel.repaint();
-                }
+                curve.C = cSlider.getValue();
+                curve.update();
             }
         });
         dSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent event) {
-                Screen.D = dSlider.getValue();
-                if (Screen.mode==1) {
-                    graphPanel.f(functionField.getText());
-                    graphPanel.repaint();
-                } else {
-                    graphPanel.f(functionField.getText(),function2Field.getText());
-                    graphPanel.repaint();
-                }
+                curve.D = dSlider.getValue();
+                curve.update();
             }
         });
+        newStandard.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve = new StandardCurve();
+                panel.remove(panel.getComponentCount()-1);
+                FunctionPanel fpanel = new FunctionPanel(1,new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        curve.mnF = Double.parseDouble(minField.getText());
+                        curve.mxF = Double.parseDouble(maxField.getText());
+                        curve.chF = Double.parseDouble(changeField.getText());
+                        curve.update();
+                    }
+                });
+                panel.add(fpanel);
+                minField.setText("0");
+                maxField.setText("1280");
+                changeField.setText("1");
+                aSlider.setValue(0);
+                bSlider.setValue(0);
+                cSlider.setValue(0);
+                dSlider.setValue(0);
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                frame.pack();
+                frame.repaint();
+            }
+        });
+        newParametric.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve = new ParametricCurve();
+                panel.remove(panel.getComponentCount()-1);
+                FunctionPanel fpanel = new FunctionPanel(2,new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        curve.mnF = Double.parseDouble(minField.getText());
+                        curve.mxF = Double.parseDouble(maxField.getText());
+                        curve.chF = Double.parseDouble(changeField.getText());
+                        curve.update();
+                    }
+                });
+                panel.add(fpanel);
+                minField.setText("0");
+                maxField.setText("12800");
+                changeField.setText("1");
+                aSlider.setValue(0);
+                bSlider.setValue(0);
+                cSlider.setValue(0);
+                dSlider.setValue(0);
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                frame.pack();
+                frame.repaint();
+            }
+        });
+        importMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               System.out.println("Import"); 
+            }
+        });
+        exportMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Export"); 
+            }
+        });
+        resetOMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve.offsetX=0;
+                curve.offsetY=0;
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                curve.update();
+            }
+        });
+        resetZMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve.zoomX=1;
+                curve.zoomY=1;
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                curve.update();
+            }
+        });
+        resetMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                curve.offsetX=0;
+                curve.offsetY=0;
+                curve.zoomX=1;
+                curve.zoomY=1;
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                curve.update();
+            }
+        });
+        curve = new StandardCurve();
+    }
+
+    class FunctionPanel extends JPanel {
+        public JButton runButton;
+        public FunctionPanel (int n, ActionListener a) {
+            super();
+            Screen.fFields.clear();
+            setBorder(new EmptyBorder(5,5,5,5));
+            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            JPanel fields = new JPanel();
+            fields.setBorder(new EmptyBorder(5,5,5,5));
+            fields.setLayout(new BoxLayout(fields, BoxLayout.Y_AXIS));
+            for (int i=0;i<n;i++) {
+                TextField t = new TextField();
+                Screen.fFields.add(t);
+                if (i==0) {
+                    fields.add(t);
+                } else {
+                    fields.add(Box.createRigidArea(new Dimension(0, 5)));
+                    fields.add(t);
+                }
+            }
+            runButton = new JButton("Run");
+            runButton.addActionListener(a);
+            add(fields);
+            add(Box.createRigidArea(new Dimension(5, 0)));
+            add(runButton);
+        }
     }
 }
