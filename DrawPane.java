@@ -12,6 +12,14 @@ public class DrawPane extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        // g.setColor(Color.BLACK);
+        // int W = Screen.W/2;
+        // int H = Screen.H/2;
+        // int comp = (int)(Math.sqrt(3.0/4.0)*100);
+        // System.out.println("comp is: " + comp);
+        // g.drawLine(W,H,W+0, H-100);
+        // g.drawLine(W,H,W+comp, H+50);
+        // g.drawLine(W,H,W-comp, H+50);
         Screen.curve.draw(g);
     }
 }

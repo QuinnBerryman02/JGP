@@ -13,9 +13,14 @@ public class Curve {
     public int B = 1;
     public int C = 1;
     public int D = 1;
+    public Shader shader;
 
     public Curve () {
-        
+        shader = new Shader();
+        // shader.rRaw = new String("255");
+        // shader.gRaw = new String("0");
+        // shader.bRaw = new String("0");
+        // shader.aRaw = new String("255");
     }
     
     public void update() {
@@ -24,6 +29,10 @@ public class Curve {
 
     public void draw(Graphics g) {
 
+    }
+
+    public ArrayList<String> getRaws() {
+        return null;
     }
 
     public ArrayList<String> slicer (String raw) { 
@@ -277,9 +286,33 @@ public class Curve {
                     answer = scheme(slicer(args.get(1)),t) + Math.random()*Math.abs(scheme(slicer(args.get(2)),t)-scheme(slicer(args.get(1)),t));
                 }
                 break;
+            case "%":
+                if (args.size()!=3) {
+                    System.out.println("ARGUMENT ERROR");
+                    return 0.0;
+                } else {
+                    answer = Math.floorMod((int)scheme(slicer(args.get(1)),t), (int)scheme(slicer(args.get(2)),t));
+                }
+                break;
             default:
                 break;
         }
         return answer;
+    }
+
+    public String toString() {
+        return String.valueOf(zoomX) +
+        String.valueOf(zoomY) +
+        String.valueOf(offsetX) +
+        String.valueOf(offsetY) +
+        String.valueOf(mnF) +
+        String.valueOf(mxF) +
+        String.valueOf(chF) +
+        String.valueOf(A) +
+        String.valueOf(B) +
+        String.valueOf(C) +
+        String.valueOf(D) +
+        String.valueOf(shader) + 
+        String.valueOf(getRaws()); 
     }
 }

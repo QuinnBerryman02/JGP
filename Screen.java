@@ -10,6 +10,7 @@ public class Screen {
     public final static int W = Toolkit.getDefaultToolkit().getScreenSize().width;
     public final static int H = Toolkit.getDefaultToolkit().getScreenSize().height;
     public static Curve curve;
+    public static Curve curve2;
     public static JFrame frame = new JFrame("Graphing Program");
     public static JPanel panel = new JPanel();
     public static DrawPane graph;
@@ -22,9 +23,13 @@ public class Screen {
         panel.setBorder(new EmptyBorder(5,5,5,5));
 
         JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
-        JMenu editMenu = new JMenu("Edit");
+        JMenu curveMenu = new JMenu("Curve");
+        JMenu moveMenu = new JMenu("Move");
+        JMenu colorMenu = new JMenu("Color");
         JMenu newMenu = new JMenu("New");
+        JMenuItem currCurve = new JMenuItem("Current");
+        currCurve.setMnemonic(KeyEvent.VK_C);
+        currCurve.setActionCommand("Current");
         JMenuItem newStandard = new JMenuItem("Standard");
         newStandard.setMnemonic(KeyEvent.VK_S);
         newStandard.setActionCommand("Standard");
@@ -37,6 +42,18 @@ public class Screen {
         JMenuItem exportMenuItem = new JMenuItem("Export");
         exportMenuItem.setMnemonic(KeyEvent.VK_E);
         exportMenuItem.setActionCommand("Export");
+        JMenuItem currentColorMenuItem = new JMenuItem("Current");
+        currentColorMenuItem.setMnemonic(KeyEvent.VK_C);
+        currentColorMenuItem.setActionCommand("Current");
+        JMenuItem newColorMenuItem = new JMenuItem("New");
+        newColorMenuItem.setMnemonic(KeyEvent.VK_N);
+        newColorMenuItem.setActionCommand("New");
+        JMenuItem importColorMenuItem = new JMenuItem("Import");
+        importColorMenuItem.setMnemonic(KeyEvent.VK_I);
+        importColorMenuItem.setActionCommand("Import");
+        JMenuItem exportColorMenuItem = new JMenuItem("Export");
+        exportColorMenuItem.setMnemonic(KeyEvent.VK_E);
+        exportColorMenuItem.setActionCommand("Export");
         JMenuItem resetOMenuItem = new JMenuItem("Reset Offset");
         resetOMenuItem.setMnemonic(KeyEvent.VK_O);
         resetOMenuItem.setActionCommand("Reset Offset");
@@ -46,16 +63,22 @@ public class Screen {
         JMenuItem resetMenuItem = new JMenuItem("Reset");
         resetMenuItem.setMnemonic(KeyEvent.VK_R);
         resetMenuItem.setActionCommand("Reset");
-        fileMenu.add(newMenu);
+        curveMenu.add(currCurve);
+        curveMenu.add(newMenu);
         newMenu.add(newStandard);
         newMenu.add(newParametric);
-        fileMenu.add(importMenuItem);
-        fileMenu.add(exportMenuItem);
-        editMenu.add(resetOMenuItem);
-        editMenu.add(resetZMenuItem);
-        editMenu.add(resetMenuItem);
-        menuBar.add(fileMenu);
-        menuBar.add(editMenu);
+        curveMenu.add(importMenuItem);
+        curveMenu.add(exportMenuItem);
+        moveMenu.add(resetOMenuItem);
+        moveMenu.add(resetZMenuItem);
+        moveMenu.add(resetMenuItem);
+        colorMenu.add(currentColorMenuItem);
+        colorMenu.add(newColorMenuItem);
+        colorMenu.add(importColorMenuItem);
+        colorMenu.add(exportColorMenuItem);
+        menuBar.add(curveMenu);
+        menuBar.add(moveMenu);
+        menuBar.add(colorMenu);
 
         JPanel labelPanel = new JPanel();
         labelPanel.setBorder(new EmptyBorder(5,5,5,5));
@@ -106,22 +129,22 @@ public class Screen {
         JLabel bLabel = new JLabel("B");
         JLabel cLabel = new JLabel("C");
         JLabel dLabel = new JLabel("D");
-        JSlider aSlider = new JSlider(-25, 25, 0);
+        JSlider aSlider = new JSlider(-25, 25, 1);
         aSlider.setMinorTickSpacing(1);  
         aSlider.setMajorTickSpacing(5);  
         aSlider.setPaintTicks(true);  
         aSlider.setPaintLabels(true);  
-        JSlider bSlider = new JSlider(-25, 25, 0);
+        JSlider bSlider = new JSlider(-25, 25, 1);
         bSlider.setMinorTickSpacing(1);  
         bSlider.setMajorTickSpacing(5);  
         bSlider.setPaintTicks(true);  
         bSlider.setPaintLabels(true);  
-        JSlider cSlider = new JSlider(-25, 25, 0);
+        JSlider cSlider = new JSlider(-25, 25, 1);
         cSlider.setMinorTickSpacing(1);  
         cSlider.setMajorTickSpacing(5);  
         cSlider.setPaintTicks(true);  
         cSlider.setPaintLabels(true);  
-        JSlider dSlider = new JSlider(-25, 25, 0);
+        JSlider dSlider = new JSlider(-25, 25, 1);
         dSlider.setMinorTickSpacing(1);  
         dSlider.setMajorTickSpacing(5);  
         dSlider.setPaintTicks(true);  
@@ -183,10 +206,61 @@ public class Screen {
                 curve.update();
             }
         });
+        currCurve.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //System.out.println("start of current Curve Curve 1:" + curve + "\nCurve 2:" + curve2);
+                Shader tempShader = curve.shader;
+                if (curve instanceof ColorWheel) {
+                    curve = curve2;
+                    curve2 = null;
+                    curve.shader = tempShader;
+                } else {
+                    return;
+                }
+                minField.setText(String.valueOf(curve.mnF)); 
+                maxField.setText(String.valueOf(curve.mxF));
+                changeField.setText(String.valueOf(curve.chF));
+                panel.remove(panel.getComponentCount()-1);
+                int funcs = 1;
+                if (curve instanceof StandardCurve) {
+                    funcs = 1;
+                } else if (curve instanceof ParametricCurve) {
+                    funcs = 2;
+                }
+                FunctionPanel fpanel = new FunctionPanel(funcs,new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        curve.mnF = Double.parseDouble(minField.getText());
+                        curve.mxF = Double.parseDouble(maxField.getText());
+                        curve.chF = Double.parseDouble(changeField.getText());
+                        curve.update();
+                    }
+                });
+                for (int i=0;i<fFields.size();i++) {
+                    fFields.get(i).setText(curve.getRaws().get(i));
+                }
+                aSlider.setValue(curve.A);
+                bSlider.setValue(curve.B);
+                cSlider.setValue(curve.C);
+                dSlider.setValue(curve.D);
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                panel.add(fpanel);
+                frame.pack();
+                frame.repaint();
+                curve.update();
+            }
+        });
         newStandard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                Shader tempShader = curve.shader;
                 curve = new StandardCurve();
+                curve.shader = tempShader;
                 panel.remove(panel.getComponentCount()-1);
+                minField.setText("0");
+                maxField.setText("1280");
+                changeField.setText("1");
                 FunctionPanel fpanel = new FunctionPanel(1,new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         curve.mnF = Double.parseDouble(minField.getText());
@@ -196,13 +270,10 @@ public class Screen {
                     }
                 });
                 panel.add(fpanel);
-                minField.setText("0");
-                maxField.setText("1280");
-                changeField.setText("1");
-                aSlider.setValue(0);
-                bSlider.setValue(0);
-                cSlider.setValue(0);
-                dSlider.setValue(0);
+                aSlider.setValue(1);
+                bSlider.setValue(1);
+                cSlider.setValue(1);
+                dSlider.setValue(1);
                 labels[0].setText("X offset: " + curve.offsetX);
                 labels[1].setText("Y offset: " + curve.offsetY);
                 labels[2].setText("X Zoom: " + curve.zoomX);
@@ -213,8 +284,13 @@ public class Screen {
         });
         newParametric.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                Shader tempShader = curve.shader;
                 curve = new ParametricCurve();
+                curve.shader = tempShader;
                 panel.remove(panel.getComponentCount()-1);
+                minField.setText("0");
+                maxField.setText("12800");
+                changeField.setText("1");
                 FunctionPanel fpanel = new FunctionPanel(2,new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         curve.mnF = Double.parseDouble(minField.getText());
@@ -224,13 +300,10 @@ public class Screen {
                     }
                 });
                 panel.add(fpanel);
-                minField.setText("0");
-                maxField.setText("12800");
-                changeField.setText("1");
-                aSlider.setValue(0);
-                bSlider.setValue(0);
-                cSlider.setValue(0);
-                dSlider.setValue(0);
+                aSlider.setValue(1);
+                bSlider.setValue(1);
+                cSlider.setValue(1);
+                dSlider.setValue(1);
                 labels[0].setText("X offset: " + curve.offsetX);
                 labels[1].setText("Y offset: " + curve.offsetY);
                 labels[2].setText("X Zoom: " + curve.zoomX);
@@ -280,7 +353,96 @@ public class Screen {
                 curve.update();
             }
         });
+        currentColorMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("start of current Color Curve 1:" + curve + "\nCurve 2:" + curve2);
+                if (curve instanceof ColorWheel) {
+                    return;
+                }
+                curve2 = curve;
+                curve = new ColorWheel();
+                curve.shader = curve2.shader;
+                panel.remove(panel.getComponentCount()-1);
+                minField.setText("0");
+                maxField.setText("1280");
+                changeField.setText("1");
+                FunctionPanel fpanel = new FunctionPanel(4,new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        curve.mnF = Double.parseDouble(minField.getText());
+                        curve.mxF = Double.parseDouble(maxField.getText());
+                        curve.chF = Double.parseDouble(changeField.getText());
+                        curve.update();
+                    }
+                });
+                fFields.get(0).setText(curve.shader.rRaw);
+                fFields.get(1).setText(curve.shader.gRaw);
+                fFields.get(2).setText(curve.shader.bRaw);
+                fFields.get(3).setText(curve.shader.aRaw);
+                panel.add(fpanel);
+                aSlider.setValue(curve2.A);
+                bSlider.setValue(curve2.B);
+                cSlider.setValue(curve2.C);
+                dSlider.setValue(curve2.D);
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                frame.pack();
+                frame.repaint();
+                curve.update();
+                System.out.println("end of current Color Curve 1:" + curve + "\nCurve 2:" + curve2);
+            }
+        });
+        newColorMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (curve instanceof ColorWheel) {
+                    //
+                } else {
+                    curve2 = curve;
+                }
+                curve = new ColorWheel();
+                curve.shader = new Shader("0","0","0","255");
+                panel.remove(panel.getComponentCount()-1);
+                minField.setText("0");
+                maxField.setText("1280");
+                changeField.setText("1");
+                FunctionPanel fpanel = new FunctionPanel(4,new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        curve.mnF = Double.parseDouble(minField.getText());
+                        curve.mxF = Double.parseDouble(maxField.getText());
+                        curve.chF = Double.parseDouble(changeField.getText());
+                        curve.update();
+                    }
+                });
+                fFields.get(0).setText("0");
+                fFields.get(1).setText("0");
+                fFields.get(2).setText("0");
+                fFields.get(3).setText("255");
+                panel.add(fpanel);
+                aSlider.setValue(curve2.A);
+                bSlider.setValue(curve2.B);
+                cSlider.setValue(curve2.C);
+                dSlider.setValue(curve2.D);
+                labels[0].setText("X offset: " + curve.offsetX);
+                labels[1].setText("Y offset: " + curve.offsetY);
+                labels[2].setText("X Zoom: " + curve.zoomX);
+                labels[3].setText("Y Zoom: " + curve.zoomY);
+                frame.pack();
+                frame.repaint();
+            }
+        });
+        importColorMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               System.out.println("Import"); 
+            }
+        });
+        exportColorMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Export"); 
+            }
+        });
         curve = new StandardCurve();
+        curve.shader = new Shader("0","0","0","255");
     }
 
     class FunctionPanel extends JPanel {
