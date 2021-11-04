@@ -1,10 +1,13 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class DrawPane extends JPanel {
     public DrawPane() {
         super();
+        setBorder(new EmptyBorder(5,5,5,5));
+        setPreferredSize(new Dimension(Screen.W,Screen.H));
         addMouseListener(new MyMouse());
         addMouseWheelListener(new MyWheel());
     }
@@ -12,21 +15,13 @@ public class DrawPane extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // g.setColor(Color.BLACK);
-        // int W = Screen.W/2;
-        // int H = Screen.H/2;
-        // int comp = (int)(Math.sqrt(3.0/4.0)*100);
-        // System.out.println("comp is: " + comp);
-        // g.drawLine(W,H,W+0, H-100);
-        // g.drawLine(W,H,W+comp, H+50);
-        // g.drawLine(W,H,W-comp, H+50);
         Screen.curve.draw(g);
     }
 }
 
 class MyMouse implements MouseListener {
-    public static int ox = 0;
-    public static int oy = 0;
+    public int ox = 0;
+    public int oy = 0;
     public MyMouse() {
         super();
     }
@@ -45,13 +40,14 @@ class MyMouse implements MouseListener {
 
     public void mouseReleased(MouseEvent e) {
         if (e.getButton()==1) {
+            int oldX = Screen.curve.getOffsetX();
+            int oldY = Screen.curve.getOffsetY();
             int dx = e.getX() - ox;
             int dy = oy - e.getY();
-            Screen.curve.offsetX += dx;
-            Screen.curve.offsetY -= dy;
-            Screen.labels[0].setText("X offset: " + Screen.curve.offsetX);
-            Screen.labels[1].setText("Y offset: " + Screen.curve.offsetY);
+            Screen.curve.setOffset(oldX + dx,oldY - dy);
+            Screen.labelPanel.sync(Screen.curve);  //"X offset: " + (oldX + dx)   //"Y offset: " + (oldY - dy)
             Screen.curve.update();
+            Screen.graph.repaint();
         }
     }
 
@@ -71,10 +67,13 @@ class MyWheel implements MouseWheelListener{
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent mwe) {
-        Screen.curve.zoomX *= Math.pow(1.1,-mwe.getPreciseWheelRotation());
-        Screen.curve.zoomY *= Math.pow(1.1,-mwe.getPreciseWheelRotation());
-        Screen.labels[2].setText("X Zoom: " + Screen.curve.zoomX);
-        Screen.labels[3].setText("Y Zoom: " + Screen.curve.zoomY);
+        double oldX = Screen.curve.getZoomX();
+        double oldY = Screen.curve.getZoomY();
+        double zX = Math.pow(1.1,-mwe.getPreciseWheelRotation());
+        double zY = Math.pow(1.1,-mwe.getPreciseWheelRotation());
+        Screen.curve.setZoom(oldX * zX, oldY * zY);
+        Screen.labelPanel.sync(Screen.curve); //"X Zoom: " + (oldX * zX)   //"Y Zoom: " + (oldY * zY)
         Screen.curve.update();
+        Screen.graph.repaint();
     }
 }

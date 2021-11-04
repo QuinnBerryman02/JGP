@@ -2,26 +2,25 @@ import java.util.ArrayList;
 import java.awt.*;
 
 public class StandardCurve extends Curve{
-    public String raw;
+    public static final ArrayList<Double> DEFAULT = new ArrayList<>() {{add(0.0); add((double)Screen.W); add(1.0);}};
+    public String raw = "";
     public ArrayList<Double> pointsY = new ArrayList<Double>();
     public ArrayList<Color> pointsC = new ArrayList<Color>();
 
     public StandardCurve() {
         super();
+        funcs = 1;
     }
 
     @Override
     public void update() {
         pointsY.clear();
         pointsC.clear();
-        raw = Screen.fFields.get(0).getText();
         ArrayList<String> args = slicer(raw);
         ArrayList<String> rStr = slicer(shader.rRaw);
         ArrayList<String> gStr = slicer(shader.gRaw);
         ArrayList<String> bStr = slicer(shader.bRaw);
         ArrayList<String> aStr = slicer(shader.aRaw);
-        //Point oPoint = new Point(Screen.W/2,Screen.H/2);
-        //need to optimise, by evaluating anything that doesnt have a t, all the other evals should be constants
         for (double t=0;t<Screen.W;t+=1) {
             if(!raw.equals("")) {
                 double xTransform = ((t - ((double)offsetX))/zoomX);
@@ -31,16 +30,13 @@ public class StandardCurve extends Curve{
                 pointsC.add(Shader.custom(  (int)scheme(rStr,t), 
                                             (int)scheme(gStr,t),
                                             (int)scheme(bStr,t), 
-                                            (int)scheme(aStr,t)));
-                //pointsC.add(Shader.rainbow(new Point((int)t,(int)yTransform)));  
-                //System.out.println("t : " + t + "\txTrans : " + xTransform + "\teval : " + evaluate + "\tyTrans" + yTransform);
+                                            (int)scheme(aStr,t))); 
             } else {
                 pointsY.add(0.0);
                 pointsC.add(Color.BLACK);  
             }
             
         }
-        Screen.graph.repaint();
     }
 
     public void draw(Graphics g) {
@@ -51,9 +47,13 @@ public class StandardCurve extends Curve{
     }
     
     public ArrayList<String> getRaws() {
-        //System.out.println("Raw "+raw);
-        ArrayList<String> raws = new ArrayList<String>();
-        raws.add(raw);
+        ArrayList<String> raws = new ArrayList<String>() {{
+            add(raw);
+        }};
         return raws;
+    }
+
+    public void setRaws(ArrayList<String> raws) {
+        raw = raws.get(0);
     }
 }

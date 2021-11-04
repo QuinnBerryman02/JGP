@@ -2,19 +2,18 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class ColorWheel extends Curve{
+    public static final ArrayList<Double> DEFAULT = new ArrayList<>() {{add(0.0); add((double)Screen.W); add(1.0);}};
+    public static final ArrayList<String> DEFAULT_RAW = new ArrayList<>() {{add("0"); add("0"); add("0"); add("255");}};
     public ArrayList<Color> pointsC = new ArrayList<Color>();
 
     public ColorWheel() {
         super();
+        funcs = 4;
     }
     
     @Override
     public void update() {
         pointsC.clear();
-        shader.rRaw = Screen.fFields.get(0).getText();
-        shader.gRaw = Screen.fFields.get(1).getText();
-        shader.bRaw = Screen.fFields.get(2).getText();
-        shader.aRaw = Screen.fFields.get(3).getText();
         ArrayList<String> rStr = slicer(shader.rRaw);
         ArrayList<String> gStr = slicer(shader.gRaw);
         ArrayList<String> bStr = slicer(shader.bRaw);
@@ -29,7 +28,6 @@ public class ColorWheel extends Curve{
         } else {
             pointsC.add(Color.WHITE);  
         }
-        Screen.graph.repaint();
     }
 
     public void draw(Graphics g) {
@@ -37,5 +35,20 @@ public class ColorWheel extends Curve{
             g.setColor(pointsC.get(t));
             g.drawLine(t, 0, t, Screen.H);
         }
+    }
+
+    public ArrayList<String> getRaws() {
+        //System.out.println("Raw "+raw);
+        ArrayList<String> raws = new ArrayList<String>() {{
+            add(shader.rRaw);
+            add(shader.gRaw);
+            add(shader.bRaw);
+            add(shader.aRaw);
+        }};
+        return raws;
+    }
+
+    public void setRaws(ArrayList<String> raws) {
+        shader.setRaws(raws);
     }
 }

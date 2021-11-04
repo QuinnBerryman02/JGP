@@ -1,13 +1,15 @@
 import java.awt.*;
+import java.util.ArrayList;;
 
 public class Shader {
-    public String rRaw;
-    public String gRaw;
-    public String bRaw;
-    public String aRaw;
+    public String rRaw = "";
+    public String gRaw = "";
+    public String bRaw = "";
+    public String aRaw = "";
 
     public Shader() {
         super();
+        setRaws(ColorWheel.DEFAULT_RAW);
     }
 
     public Shader(String r, String g, String b, String a) {
@@ -44,9 +46,26 @@ public class Shader {
     }
 
     public String toString() {
-        return String.valueOf(rRaw) +
-        String.valueOf(gRaw) +
-        String.valueOf(bRaw) +
-        String.valueOf(aRaw);
+        return  rRaw + " " +
+                gRaw + " " +
+                bRaw + " " +
+                aRaw + " ";
+    }
+
+    public ArrayList<String> getRaws() {
+        ArrayList<String> temp = new ArrayList<String>() {{
+            add(rRaw);
+            add(gRaw);
+            add(bRaw);
+            add(aRaw);
+        }};
+        return temp;
+    }
+
+    public void setRaws(ArrayList<String> raws) {
+        rRaw = raws.get(0);
+        gRaw = raws.get(1);
+        bRaw = raws.get(2);
+        aRaw = raws.get(3);
     }
 }
